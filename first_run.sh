@@ -6,7 +6,10 @@ docker run \
     -it \
     --rm \
     --hostname ${FREEIPA_HOST} \
-    --volume ${SERVICE_DATA}:/data \
+    --volume ${SERVICE_DATA}:/data:Z \
+    --volume /sys/fs/cgroup:/sys/fs/cgroup:ro \
+    --privileged \
+    --security-opt seccomp:unconfined \
     --publish "443:443" \
     --publish "389:389" \
     --publish "636:636" \
