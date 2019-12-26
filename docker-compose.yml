@@ -1,0 +1,75 @@
+version: '3.5'
+
+services:
+  backup:
+    image: ${DOCKER_IMAGE_BACKUP}
+    container_name: ${SERVICE_NAME}_${CONTAINER_NAME_BACKUP}
+    command: freeipa backup --service freeipa_${FREEIPA_HOST} --data /backup/data S3://${S3_PATH} --container ${SERVICE_NAME}_${CONTAINER_NAME_FREEIPA}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${SERVICE_DATA}:/backup/data
+    environment:
+      - BACKUP_SCHEDULE=${BACKUP_SCHEDULE}
+      - FREEIPA_HOST=${FREEIPA_HOST}
+      - SERVICE_NAME=${SERVICE_NAME}
+      - CONTAINER_NAME_FREEIPA=${CONTAINER_NAME_FREEIPA}
+      - S3_APPLICATION_KEY=${S3_APPLICATION_KEY}
+      - S3_ACCOUNT_ID=${S3_ACCOUNT_ID}
+      - S3_HOST_BASE=${S3_HOST_BASE}
+      - S3_PATH=${S3_PATH}
+      - S3_BACKET=${S3_BACKET}
+    tmpfs:
+      - /tmp
+    networks:
+      - freeipa
+
+  freeipa:
+    image: ${DOCKER_IMAGE_FREEIPA}
+    container_name: ${SERVICE_NAME}_${CONTAINER_NAME_FREEIPA}
+    volumes:
+    - ${SERVICE_DATA}:/data
+    - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    tmpfs:
+    - /run
+    - /tmp
+    ports:
+    - "53:53/udp"
+    - "53:53"
+    - ${IP_ADDRESS}:${EXTERNAL_PORT}:443
+    - "389:389"
+    - "636:636"
+    - "88:88"
+    - "464:464"
+    - "88:88/udp"
+    - "464:464/udp"
+    - "123:123/udp"
+    - "7389:7389"
+    - "9443:9443"
+    - "9444:9444"
+    - "9445:9445"
+    expose:
+    - 443
+
+    environment:
+    - FREEIPA_HOST=${FREEIPA_HOST}
+    # - USE_LETSENCRYPT_CERTS=${USE_LETSENCRYPT_CERTS}
+    - IPA_SERVER_IP=${IPA_SERVER_IP}
+    - VIRTUAL_HOST=${FREEIPA_HOST}
+    # - LETSENCRYPT_HOST=${FREEIPA_HOST}
+    # - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+    - VIRTUAL_PROTO=https
+    - VIRTUAL_PORT=443
+#    - HTTPS_METHOD=noredirect
+    hostname: ${FREEIPA_HOST}
+    restart: always
+    sysctls:
+    - net.ipv6.conf.all.disable_ipv6=0
+    - net.ipv6.conf.lo.disable_ipv6=0
+    - net.ipv6.conf.eth0.disable_ipv6=0
+    cap_add:
+      - SYS_TIME
+    networks:
+    - freeipa
+
+networks:
+  freeipa:
