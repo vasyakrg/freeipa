@@ -33,20 +33,13 @@ services:
     - /run
     - /tmp
     ports:
-    - "53:53/udp"
-    - "53:53"
     - ${IP_ADDRESS}:${EXTERNAL_PORT}:443
     - "389:389"
     - "636:636"
     - "88:88"
-    - "464:464"
     - "88:88/udp"
+    - "464:464"
     - "464:464/udp"
-    - "123:123/udp"
-    - "7389:7389"
-    - "9443:9443"
-    - "9444:9444"
-    - "9445:9445"
     expose:
     - 443
 
@@ -73,3 +66,4 @@ services:
 
 networks:
   freeipa:
+    name: ${SERVICE_NAME}
