@@ -40,9 +40,9 @@ services:
     - "88:88/udp"
     - "464:464"
     - "464:464/udp"
+    - "123:123/udp"
     expose:
     - 443
-
     environment:
     - FREEIPA_HOST=${FREEIPA_HOST}
     # - USE_LETSENCRYPT_CERTS=${USE_LETSENCRYPT_CERTS}
