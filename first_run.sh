@@ -10,6 +10,7 @@ docker run \
     --volume /sys/fs/cgroup:/sys/fs/cgroup:ro \
     --privileged \
     --security-opt seccomp:unconfined \
+    --sysctl net.ipv6.conf.all.disable_ipv6=0 \
     --publish "443:443" \
     --publish "389:389" \
     --publish "636:636" \
