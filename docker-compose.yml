@@ -4,10 +4,11 @@ services:
   backup:
     image: ${DOCKER_IMAGE_BACKUP}
     container_name: ${SERVICE_NAME}_${CONTAINER_NAME_BACKUP}
-    command: freeipa backup --service freeipa_${FREEIPA_HOST} --data /backup/data S3://${S3_PATH} --container ${SERVICE_NAME}_${CONTAINER_NAME_FREEIPA}
+    command: freeipa backup --service freeipa_${FREEIPA_HOST} --data /data --cert /data/cert S3://${S3_PATH} --container ${SERVICE_NAME}_${CONTAINER_NAME_FREEIPA}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${SERVICE_DATA}:/backup/data
+      - ${WEBPROXY_DATA}/certs/${FREEIPA_HOST}:/data/cert
+      - ${SERVICE_DATA}:/data
     environment:
       - BACKUP_SCHEDULE=${BACKUP_SCHEDULE}
       - FREEIPA_HOST=${FREEIPA_HOST}
@@ -28,6 +29,7 @@ services:
     container_name: ${SERVICE_NAME}_${CONTAINER_NAME_FREEIPA}
     volumes:
     - ${SERVICE_DATA}:/data
+    - ${WEBPROXY_DATA}/certs/${FREEIPA_HOST}:/data/cert
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
     tmpfs:
     - /run
