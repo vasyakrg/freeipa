@@ -8,4 +8,4 @@ docker run --name ${CONTAINER_NAME_FREEIPA} -ti --rm \
     -e PASSWORD=${FREEIPA_PASS} \
     -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
     --tmpfs /run --tmpfs /tmp \
-    -v ${SERVICE_DATA}:/data:Z freeipa-server exit-on-finished -U -r ${FREEIPA_REALM} --no-ntp
+    -v ${SERVICE_DATA}:/data:Z ${DOCKER_IMAGE_FREEIPA} exit-on-finished -U -r ${FREEIPA_REALM} --no-ntp
