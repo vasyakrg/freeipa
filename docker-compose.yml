@@ -1,35 +1,36 @@
 version: '3.5'
 
 services:
-  backup:
-    image: ${DOCKER_IMAGE_BACKUP}
-    container_name: ${SERVICE_NAME}_${CONTAINER_NAME_BACKUP}
-    command: freeipa backup --service freeipa_${FREEIPA_HOST} --data /data --cert /data/cert --storage S3://${S3_PATH} --container ${SERVICE_NAME}_${CONTAINER_NAME_FREEIPA}
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ${WEBPROXY_DATA}/certs/${FREEIPA_HOST}:/data/cert
-      - ${SERVICE_DATA}:/data
-    environment:
-      - BACKUP_SCHEDULE=${BACKUP_SCHEDULE}
-      - FREEIPA_HOST=${FREEIPA_HOST}
-      - SERVICE_NAME=${SERVICE_NAME}
-      - CONTAINER_NAME_FREEIPA=${CONTAINER_NAME_FREEIPA}
-      - S3_APPLICATION_KEY=${S3_APPLICATION_KEY}
-      - S3_ACCOUNT_ID=${S3_ACCOUNT_ID}
-      - S3_HOST_BASE=${S3_HOST_BASE}
-      - S3_PATH=${S3_PATH}
-      - S3_BACKET=${S3_BACKET}
-    tmpfs:
-      - /tmp
-    networks:
-      - freeipa
+  # backup:
+  #   image: ${DOCKER_IMAGE_BACKUP}
+  #   container_name: ${SERVICE_NAME}_${CONTAINER_NAME_BACKUP}
+  #   command: freeipa backup --service freeipa_${FREEIPA_HOST} --data /data --cert /data/cert --storage S3://${S3_PATH} --container ${SERVICE_NAME}_${CONTAINER_NAME_FREEIPA}
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - ${WEBPROXY_DATA}/certs/${FREEIPA_HOST}:/data/cert
+  #     - ${SERVICE_DATA}:/data
+  #   environment:
+  #     - BACKUP_SCHEDULE=${BACKUP_SCHEDULE}
+  #     - FREEIPA_HOST=${FREEIPA_HOST}
+  #     - SERVICE_NAME=${SERVICE_NAME}
+  #     - CONTAINER_NAME_FREEIPA=${CONTAINER_NAME_FREEIPA}
+  #     - S3_APPLICATION_KEY=${S3_APPLICATION_KEY}
+  #     - S3_ACCOUNT_ID=${S3_ACCOUNT_ID}
+  #     - S3_HOST_BASE=${S3_HOST_BASE}
+  #     - S3_PATH=${S3_PATH}
+  #     - S3_BACKET=${S3_BACKET}
+  #   tmpfs:
+  #     - /tmp
+  #   networks:
+  #     - freeipa
 
   freeipa:
     image: ${DOCKER_IMAGE_FREEIPA}
     container_name: ${SERVICE_NAME}_${CONTAINER_NAME_FREEIPA}
+    privileged: true
     volumes:
     - ${SERVICE_DATA}:/data
-    - ${WEBPROXY_DATA}/certs/${FREEIPA_HOST}:/data/cert
+    # - ${WEBPROXY_DATA}/certs/${FREEIPA_HOST}:/data/cert:Z
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
     tmpfs:
     - /run
@@ -47,14 +48,16 @@ services:
     - 443
     environment:
     - FREEIPA_HOST=${FREEIPA_HOST}
-    - USE_LETSENCRYPT_CERTS=${USE_LETSENCRYPT_CERTS}
     - IPA_SERVER_IP=${IPA_SERVER_IP}
-    - VIRTUAL_HOST=${FREEIPA_HOST}
-    - LETSENCRYPT_HOST=${FREEIPA_HOST}
-    - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+    - IPA_SERVER_INSTALL_OPTS=-U -r {FREEIPA_OPTS}
     - VIRTUAL_PROTO=https
     - VIRTUAL_PORT=443
-#    - HTTPS_METHOD=noredirect
+    - VIRTUAL_HOST=${FREEIPA_HOST}
+    - PASSWORD={FREEIPA_PASS}
+    # - HTTPS_METHOD=noredirect
+    # - USE_LETSENCRYPT_CERTS=${USE_LETSENCRYPT_CERTS}
+    # - LETSENCRYPT_HOST=${FREEIPA_HOST}
+    # - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
     hostname: ${FREEIPA_HOST}
     restart: always
     sysctls:
