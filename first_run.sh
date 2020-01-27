@@ -1,9 +1,10 @@
 #!/bin/bash
 source .env
 
-# [ -f ${SERVICE_DATA}/ipa-server-install-options ] && {
-#     echo ${SERVICE_DATA}/ipa-server-install-options
-# }
+[ -f ${SERVICE_DATA}/ipa-server-install-options ] && {
+    echo "--password=${FREEIPA_PASS}" > ${SERVICE_DATA}/ipa-server-install-options
+    echo "--admin-password=${FREEIPA_PASS}" >> ${SERVICE_DATA}/ipa-server-install-options
+}
 
 docker-compose run --rm --service-ports freeipa exit-on-finished
 
