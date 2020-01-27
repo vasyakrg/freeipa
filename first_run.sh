@@ -1,7 +1,7 @@
 #!/bin/bash
 source .env
 
-[ -f ${SERVICE_DATA}/ipa-server-install-options ] && {
+[ ! -f ${SERVICE_DATA}/ipa-server-install-options ] && {
     echo "--password=${FREEIPA_PASS}" > ${SERVICE_DATA}/ipa-server-install-options
     echo "--admin-password=${FREEIPA_PASS}" >> ${SERVICE_DATA}/ipa-server-install-options
 }
