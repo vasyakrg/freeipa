@@ -1,6 +1,10 @@
 #!/bin/bash
 source .env
 
+# [ -f ${SERVICE_DATA}/ipa-server-install-options ] && {
+#     echo ${SERVICE_DATA}/ipa-server-install-options
+# }
+
 docker-compose run --rm --service-ports freeipa exit-on-finished
 
 # docker run --name ${CONTAINER_NAME_FREEIPA} -ti --rm \

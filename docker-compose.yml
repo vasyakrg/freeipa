@@ -27,7 +27,6 @@ services:
   freeipa:
     image: ${DOCKER_IMAGE_FREEIPA}
     container_name: ${SERVICE_NAME}_${CONTAINER_NAME_FREEIPA}
-    privileged: true
     volumes:
     - ${SERVICE_DATA}:/data
     # - ${WEBPROXY_DATA}/certs/${FREEIPA_HOST}:/data/cert:Z
@@ -43,9 +42,12 @@ services:
     - "88:88/udp"
     - "464:464"
     - "464:464/udp"
+    - "464:464/udp"
     - "123:123/udp"
-    expose:
-    - 443
+    - "7389:7389"
+    - "9443:9443"
+    - "9444:9444"
+    - "9445:9445"
     environment:
     - FREEIPA_HOST=${FREEIPA_HOST}
     - IPA_SERVER_IP=${IPA_SERVER_IP}
