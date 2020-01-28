@@ -4,6 +4,8 @@ services:
   # backup:
   #   image: ${DOCKER_IMAGE_BACKUP}
   #   container_name: ${SERVICE_NAME}_${CONTAINER_NAME_BACKUP}
+  #   depends_on:
+  #     - freeipa
   #   command: freeipa backup --service freeipa_${FREEIPA_HOST} --data /data --cert /data/cert --storage S3://${S3_PATH} --container ${SERVICE_NAME}_${CONTAINER_NAME_FREEIPA}
   #   volumes:
   #     - /var/run/docker.sock:/var/run/docker.sock
@@ -22,20 +24,19 @@ services:
   #   tmpfs:
   #     - /tmp
   #   networks:
-  #     - freeipa
+  #     - ${SERVICE_NAME}
 
   freeipa:
     image: ${DOCKER_IMAGE_FREEIPA}
     container_name: ${SERVICE_NAME}_${CONTAINER_NAME_FREEIPA}
     volumes:
     - ${SERVICE_DATA}:/data
-    # - ${WEBPROXY_DATA}/certs/${FREEIPA_HOST}:/data/cert:Z
+    - ${WEBPROXY_DATA}/certs/${FREEIPA_HOST}:/data/cert:Z
     - /sys/fs/cgroup:/sys/fs/cgroup:ro
     tmpfs:
     - /run
     - /tmp
     ports:
-    - ${IP_ADDRESS}:${EXTERNAL_PORT}:443
     - "389:389"
     - "636:636"
     - "88:88"
@@ -47,18 +48,18 @@ services:
     - "9443:9443"
     - "9444:9444"
     - "9445:9445"
+    expose:
+    - 80
+    - 443
     environment:
     - FREEIPA_HOST=${FREEIPA_HOST}
     - IPA_SERVER_IP=${IPA_SERVER_IP}
-    # - IPA_SERVER_INSTALL_OPTS=-U -r {FREEIPA_OPTS}
     - VIRTUAL_PROTO=https
     - VIRTUAL_PORT=443
     - VIRTUAL_HOST=${FREEIPA_HOST}
-    # - PASSWORD=${FREEIPA_PASS}
-    # - HTTPS_METHOD=noredirect
-    # - USE_LETSENCRYPT_CERTS=${USE_LETSENCRYPT_CERTS}
-    # - LETSENCRYPT_HOST=${FREEIPA_HOST}
-    # - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+    - USE_LETSENCRYPT_CERTS=${USE_LETSENCRYPT_CERTS}
+    - LETSENCRYPT_HOST=${FREEIPA_HOST}
+    - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
     hostname: ${FREEIPA_HOST}
     restart: always
     sysctls:
@@ -68,8 +69,12 @@ services:
     cap_add:
       - SYS_TIME
     networks:
-    - freeipa
+    - ${SERVICE_NAME}
+    - ${WEBPROXY_NETWORK}
 
 networks:
   freeipa:
     name: ${SERVICE_NAME}
+  webproxy:
+    external:
+      name: ${WEBPROXY_NETWORK}
